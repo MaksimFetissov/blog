@@ -1,15 +1,28 @@
 <?php
 
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [PublicController::class, 'index']);
+Route::get('/', [PublicController::class, 'index'])->name('home');
+Route::get('/pages/page1', [PublicController::class, 'page1'])->name('page1');
+Route::get('/pages/page2', [PublicController::class, 'page2'])->name('page2');
+Route::get('/post/{post}', [PublicController::class, 'post'])->name('post');
 
-Route::get('/page1', [PublicController::class, 'page1']);
+// Route::get('/admin/posts}', [PostController::class, 'index'])->name('posts.index');
+// Route::get('/admin/posts/create}', [PostController::class, 'create'])->name('posts.create');
+// Route::post('/admin/posts}', [PostController::class, 'store'])->name('posts.store');
+// Route::get('/admin/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+// Route::get('/admin/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+// Route::put('/admin/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+// Route::delete('/admin/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
-Route::get('/page2', [PublicController::class, 'page2']);
+Route::get('/secure', function(){
+    return redirect()->route('home');
+})->middleware(['password.confirm']);
 
+Route::resource('admin/posts', PostController::class);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
