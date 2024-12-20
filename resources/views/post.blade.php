@@ -1,15 +1,36 @@
 @extends('partials.layout')
 @section('title', $post->title)
 @section('content')
-    <div class="card bg-base-100 shadow-xl">
-        <figure>
-            <img src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" alt="Shoes" />
-        </figure>
+    @include('partials.post-card', ['full' => true])
+    <h1 class="text-2xl">Comments:</h1>
+    <div class="mt-2 shadow-xl card bg-base-100">
         <div class="card-body">
-            <h2 class="card-title">{{ $post->title }}</h2>
-            <p>{{!! $post->displayBody !!}}</p>
-            <div class="card-actions justify-end">
-            </div>
+            <form action="{{ route('comment', ['post' => $post]) }}" method="POST">
+                @csrf
+                <label class="form-control">
+                    <div class="label">
+                        <span class="label-text">Comment</span>
+                    </div>
+                    <textarea name="body" rows="8" class="textarea textarea-bordered @error('body') textarea-error @enderror" placeholder="Write something cool...">{{ old('body') }}</textarea>
+                    <div class="label">
+                        @error('body')
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </label>
+                <button class="btn btn-primary">Comment</button>
+            </form>
         </div>
     </div>
+    @foreach($post->comments()->latest()->get() as $comment)
+        <div class="mt-2 shadow-xl card bg-base-100">
+            <div class="card-body">
+                <p>{{ $comment->body }}</p>
+                <p class="text-neutral-content">{{ $comment->created_at->diffForHumans() }}</p>
+                <p class="text-info-content">
+                    {{ $comment->user->name }}
+                </p>
+            </div>
+        </div>
+    @endforeach
 @endsection

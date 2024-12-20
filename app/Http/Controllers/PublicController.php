@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCommentRequest;
+use App\Models\Comment;
+use App\Models\Like;
 use App\Models\Post;
+use App\Models\Tag;
+use App\Models\User;
+use Auth;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PublicController extends Controller
 {
     public function index(){
-        $posts= Post::latest()->simplePaginate(16);
+        $posts = Post::with('user')->withCount('comments')->latest()->simplePaginate(16);
         return view('index', compact('posts'));
     }
 
@@ -22,6 +28,38 @@ class PublicController extends Controller
     }
 
     public function post(Post $post){
+
         return view('post', compact('post'));
+    }
+
+    public function user(User $user){
+        $posts = $user->posts()->with('user')->withCount('comments')->latest()->paginate(16);
+        return view('index', compact('posts'));
+    }
+
+    public function comment(Post $post, StoreCommentRequest $request){
+        $comment = new Comment();
+        $comment->body = $request->input('body');
+        $comment->user()->associate(Auth::user());
+        $comment->post()->associate($post);
+        $comment->save();
+        return redirect()->back();
+    }
+
+    public function like(Post $post, Request $request){
+        $like = $post->likes()->where('user_id', Auth::id())->first();
+        if($like) {
+            $like->delete();
+        } else {
+            $like = new Like();
+            $like->user()->associate(Auth::user());
+            $like->post()->associate($post);
+            $like->save();
+        }
+        return redirect()->back();
+    }
+    public function tag(Tag $tag){
+        $posts = $tag->posts()->with('user')->withCount('comments')->latest()->paginate(16);
+        return view('index', compact('posts'));
     }
 }

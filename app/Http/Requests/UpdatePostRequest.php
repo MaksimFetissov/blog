@@ -23,7 +23,10 @@ class UpdatePostRequest extends FormRequest
     {
         return [
             'title' => ['required', 'max:255'],
-            'body' => []
+            'body' => [],
+            'image' => 'image',
+            'tags' => 'array',
+            'tags.*' => 'exists:tags,id'
         ];
     }
 }
